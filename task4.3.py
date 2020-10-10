@@ -36,7 +36,7 @@ def trackbarCallBack(x):
 
 # Smoothing the frame
 def smooth():
-    global res
+    global current_smoothing_filter, res
     # apply filter2D to the frame if the current smoothing filter flag of the filter2d is raised
     if current_smoothing_filter == SMOOTHING.FILTER2D:
         kernel = np.ones((15, 15), np.float32) / 25
@@ -66,6 +66,7 @@ def smooth():
 
 
 def apply_morphological_filter():
+    global current_morphological_filter, res
     gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
     _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
     kernel = np.ones((5, 5), np.uint8)
@@ -165,16 +166,15 @@ if __name__ == "__main__":
 
         # convert frame from bgr to hsv
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        cv2.imshow("Tracking", img)
+
+        res = moveTrackbarsAccordingly()
 
         if current_smoothing_filter != SMOOTHING.NORMAL:
             res = smooth()
 
         if current_morphological_filter != Morphological.NORMAL:
             res = apply_morphological_filter()
-
-        cv2.imshow("Tracking", img)
-
-        res = moveTrackbarsAccordingly()
 
         # wait for keystroke
         k = cv2.waitKey(1) & 0xFF
@@ -183,29 +183,35 @@ if __name__ == "__main__":
         if (k == 27) or (k == ord('q')):
             break
 
-        if k == ord('n'):
+        elif k == ord('n'):
             current_smoothing_filter = SMOOTHING.FILTER2D
 
-        if k == ord('g'):
+        elif k == ord('g'):
             current_smoothing_filter = SMOOTHING.GAUSSIANBLUR
 
-        if k == ord('m'):
+        elif k == ord('m'):
             current_smoothing_filter = SMOOTHING.MEDIANBLUR
 
-        if k == ord('b'):
+        elif k == ord('b'):
             current_smoothing_filter = SMOOTHING.BILATERAL
 
-        if k == ord('e'):
+        elif k == ord('e'):
             current_morphological_filter = Morphological.EROSION
 
-        if k == ord('d'):
+        elif k == ord('d'):
             current_morphological_filter = Morphological.DILATION
 
-        if k == ord('o'):
+        elif k == ord('o'):
             current_morphological_filter = Morphological.OPENING
 
-        if k == ord('c'):
+        elif k == ord('c'):
             current_morphological_filter = Morphological.CLOSING
+
+        elif k == ord('f'):
+           # current_morphological_filter = Morphological.NORMAL
+           # current_smoothing_filter = SMOOTHING.NORMAL
+           #res[:] = 0  # do nothing
+            print(res[:])
 
         # print(current_smoothing_filter)
         print(current_morphological_filter)
